@@ -27,10 +27,18 @@ struct ReadlineEvent {
     str: [u8; 80],
     r:c_long,
 }
+
+pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error> {
+    let nul_range_end = utf8_src
+        .iter()
+        .position(|&c| c == b'\0')
+        .unwrap_or(utf8_src.len()); // default to length if no `\0` present
+    ::std::str::from_utf8(&utf8_src[0..nul_range_end])
+}
+
 impl fmt::Display for ReadlineEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({},{}, {:?})", self.pid,self.r, String::from_utf8_lossy(self.str.as_ref())
-        )
+        write!(f, "({},{}, {:?})", self.pid,self.r, str_from_u8_nul_utf8(self.str.as_ref()).unwrap_or("Error"))
     }
 }
 unsafe impl Pod for ReadlineEvent {}
