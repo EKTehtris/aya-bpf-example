@@ -1,18 +1,14 @@
-use std::convert::{TryFrom, TryInto};
-use std::ops::DerefMut;
+#![allow(unaligned_references,unreachable_code)]
 
-use aya::{Bpf, Pod, programs::SchedClassifier};
-use aya::maps::{Array, HashMap, PerfEventArray};
-use aya::maps::Map;
-use aya::maps::perf::PerfEventArrayBuffer;
+use std::convert::{TryFrom, TryInto};
+use std::fmt;
+use std::os::raw::c_long;
+
+use aya::Pod;
+use aya::maps::PerfEventArray;
 use aya::programs::UProbe;
 use aya::util::online_cpus;
 use bytes::BytesMut;
-use std::os::unix::io::AsRawFd;
-use std::fmt::{Display, Formatter};
-use std::fmt;
-use std::ffi::CStr;
-use std::os::raw::c_long;
 
 fn main() {
     if let Err(e) = try_main() {
@@ -24,8 +20,9 @@ fn main() {
 #[repr(packed)]
 struct ReadlineEvent {
     pid: u32,
-    str: [u8; 80],
-    r:c_long,
+    // 248 is the max I can fit with those alignement, for larger command split it
+    str: [u8; 248],
+    r: c_long,
 }
 
 pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error> {
@@ -38,11 +35,11 @@ pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error
 
 impl fmt::Display for ReadlineEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({},{}, {:?})", self.pid,self.r, str_from_u8_nul_utf8(self.str.as_ref()).unwrap_or("Error"))
+        write!(f, "({},{}, {:?})", self.pid, self.r, str_from_u8_nul_utf8(self.str.as_ref()).unwrap_or("Error"))
     }
 }
-unsafe impl Pod for ReadlineEvent {}
 
+unsafe impl Pod for ReadlineEvent {}
 
 
 fn try_main() -> Result<(), anyhow::Error> {
@@ -65,16 +62,15 @@ fn try_main() -> Result<(), anyhow::Error> {
     let mut out_bufs = [BytesMut::with_capacity(1024)];
 
     loop {
-        for buffer in perf_buffers.iter_mut(){
+        for buffer in perf_buffers.iter_mut() {
             if buffer.readable() {
-                let r=buffer.read_events(&mut out_bufs)?;
-                // let a=out_bufs.clone();
-                // let array=a.get(0).unwrap();
+                let r = buffer.read_events(&mut out_bufs)?;
+                dbg!(r);
                 let (head, body, _tail) = unsafe { out_bufs.get(0).unwrap().align_to::<ReadlineEvent>() };
-                if !head.is_empty(){
+                if !head.is_empty() {
                     eprintln!("Data not aligned");
                 }
-                println!("{}",body.get(0).unwrap());
+                println!("{}", body.get(0).unwrap());
             }
         }
     }
