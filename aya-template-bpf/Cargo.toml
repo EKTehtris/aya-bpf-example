@@ -8,6 +8,7 @@ edition = "2018"
 [dependencies]
 aya-bpf = { git = "https://github.com/alessandrod/aya", branch = "main" }
 aya-bpf-cty = { git = "https://github.com/alessandrod/aya", branch = "main" }
+aya-bpf-bindings = { git = "https://github.com/alessandrod/aya", branch = "main" }
 
 [profile.dev]
 panic = "abort"

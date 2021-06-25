@@ -1,37 +1,45 @@
 #![no_std]
 #![no_main]
 
-use aya_bpf::{bindings::TC_ACT_OK, macros::uretprobe, programs::SkSkbContext, BpfContext};
+use aya_bpf::{bindings::TC_ACT_OK, BpfContext, macros::uretprobe, programs::SkSkbContext};
 use aya_bpf::helpers::bpf_probe_read;
+use aya_bpf::macros::map;
 use aya_bpf::maps::PerfMap;
+use aya_bpf::programs::ProbeContext;
+use aya_bpf_bindings::helpers::bpf_probe_read_str;
+use aya_bpf_cty::{c_long, c_void};
 
 #[panic_handler]
 fn do_panic(_info: &core::panic::PanicInfo) -> ! {
     unreachable!()
 }
 
+#[map]
+static mut READLINE_EVENTS: PerfMap<ReadlineEvent> = PerfMap::new(0);
+
 #[repr(packed)]
 struct ReadlineEvent {
-    pid:u32,
-    str:[u8;80],
+    pid: u32,
+    str: [u8; 80],
+    r:c_long,
 }
 
 #[uretprobe(name = "get_return_value")]
-fn process(mut ctx:aya_bpf::programs::ProbeContext) ->i32{
+fn process(mut ctx: aya_bpf::programs::ProbeContext) -> i32 {
     if ctx.regs.is_null() {
         return 0;
     }
-    let pid=ctx.pid();
-    let str=[0u8;80];
-    let r:Result<[u8;80],i64>=unsafe{bpf_probe_read(&str)};
-
-    if r.is_ok() {
-        let mut perfmap =PerfMap::new(0);
-        perfmap.output(&ctx, &ReadlineEvent{
+    let pid = ctx.pid();
+    let mut str = [0u8; 80];
+    let r: c_long = unsafe {
+        aya_bpf_bindings::helpers::bpf_probe_read_str(str.as_mut_ptr() as *mut c_void, 80, ctx.as_ptr())
+    };
+    unsafe {
+        READLINE_EVENTS.output(&ctx, &ReadlineEvent {
             pid,
-            str: r.unwrap()
+            str,
+            r
         }, 0);
-        return 0;
     }
-    return 1;
+    return 0;
 }

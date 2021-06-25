@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 aya = { git="https://github.com/alessandrod/aya", branch="main", features = ["async_tokio"] }
 anyhow = "1"
+bytes = "1.0.1"
