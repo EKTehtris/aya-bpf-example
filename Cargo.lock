@@ -17,7 +17,7 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 [[package]]
 name = "aya"
 version = "0.10.2"
-source = "git+https://github.com/alessandrod/aya?branch=main#d8d311738c974f3b6fad22006ab2b827d0925ce8"
+source = "git+https://github.com/EKTehtris/aya?branch=probe_regs#94487fb5a4feda44741cdb1891b6f4e2c2553e68"
 dependencies = [
  "bitflags",
  "bytes",

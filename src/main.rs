@@ -2,7 +2,6 @@
 
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
-use std::os::raw::c_long;
 
 use aya::Pod;
 use aya::maps::PerfEventArray;
@@ -15,14 +14,19 @@ fn main() {
         eprintln!("error: {:#}", e);
     }
 }
-
+pub const MAX_LENGTH:usize=100;
 #[derive(Copy, Clone, Debug)]
 #[repr(packed)]
 struct ReadlineEvent {
     pid: u32,
-    // 248 is the max I can fit with those alignement, for larger command split it
-    str: [u8; 248],
-    r: c_long,
+    str: [u8; MAX_LENGTH],
+    ret:u64,
+    parm1:u64,
+    parm2:u64,
+    parm3:u64,
+    parm4:u64,
+    parm5:u64,
+    parm6:u64,
 }
 
 pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error> {
@@ -35,7 +39,8 @@ pub fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error
 
 impl fmt::Display for ReadlineEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({},{}, {:?})", self.pid, self.r, str_from_u8_nul_utf8(self.str.as_ref()).unwrap_or("Error"))
+        write!(f, "({},{},{},{},{},{},{},{}, {:?})",
+               self.pid, self.ret,self.parm1,self.parm2,self.parm3,self.parm4,self.parm5,self.parm6, str_from_u8_nul_utf8(self.str.as_ref()).unwrap_or("Error"))
     }
 }
 

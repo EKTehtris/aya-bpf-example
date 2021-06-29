@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "aya-bpf"
 version = "0.1.0"
-source = "git+https://github.com/alessandrod/aya?branch=main#d8d311738c974f3b6fad22006ab2b827d0925ce8"
+source = "git+https://github.com/EKTehtris/aya?branch=probe_regs#94487fb5a4feda44741cdb1891b6f4e2c2553e68"
 dependencies = [
  "aya-bpf-bindings",
  "aya-bpf-cty",
@@ -15,7 +15,7 @@ dependencies = [
 [[package]]
 name = "aya-bpf-bindings"
 version = "0.1.0"
-source = "git+https://github.com/alessandrod/aya?branch=main#d8d311738c974f3b6fad22006ab2b827d0925ce8"
+source = "git+https://github.com/EKTehtris/aya?branch=probe_regs#94487fb5a4feda44741cdb1891b6f4e2c2553e68"
 dependencies = [
  "aya-bpf-cty",
 ]
@@ -23,12 +23,12 @@ dependencies = [
 [[package]]
 name = "aya-bpf-cty"
 version = "0.2.1"
-source = "git+https://github.com/alessandrod/aya?branch=main#d8d311738c974f3b6fad22006ab2b827d0925ce8"
+source = "git+https://github.com/EKTehtris/aya?branch=probe_regs#94487fb5a4feda44741cdb1891b6f4e2c2553e68"
 
 [[package]]
 name = "aya-bpf-macros"
 version = "0.1.0"
-source = "git+https://github.com/alessandrod/aya?branch=main#d8d311738c974f3b6fad22006ab2b827d0925ce8"
+source = "git+https://github.com/EKTehtris/aya?branch=probe_regs#94487fb5a4feda44741cdb1891b6f4e2c2553e68"
 dependencies = [
  "proc-macro2",
  "quote",
